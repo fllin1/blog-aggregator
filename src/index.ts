@@ -1,45 +1,49 @@
 import {
   CommandsRegistry,
-  handlerAddFeed,
-  handlerAgg,
-  handlerFeeds,
-  handlerFollow,
-  handlerFollowing,
-  handlerLogin,
-  handlerRegister,
-  handlerReset,
-  handlerUsers,
   registerCommand,
   runCommand,
-} from "./commands.js";
+} from "./commands/commands";
+import {
+  handlerListUsers,
+  handlerLogin,
+  handlerRegister,
+} from "./commands/users";
+import { handlerReset } from "./commands/reset";
+import { handlerAgg } from "./commands/aggregate";
+import { handlerAddFeed, handlerListFeeds } from "./commands/feeds";
+import { handlerFollow, handlerListFeedFollows } from "./commands/feed-follows";
 
 async function main() {
-  const registry: CommandsRegistry = {};
-  registerCommand(registry, "login", handlerLogin);
-  registerCommand(registry, "register", handlerRegister);
-  registerCommand(registry, "reset", handlerReset);
-  registerCommand(registry, "users", handlerUsers);
-  registerCommand(registry, "agg", handlerAgg);
-  registerCommand(registry, "addfeed", handlerAddFeed);
-  registerCommand(registry, "feeds", handlerFeeds);
-  registerCommand(registry, "follow", handlerFollow);
-  registerCommand(registry, "following", handlerFollowing);
+  const args = process.argv.slice(2);
 
-  if (process.argv.length < 3) {
-    console.error("Requires at least one argument");
+  if (args.length < 1) {
+    console.log("usage: cli <command> [args...]");
     process.exit(1);
   }
 
-  const cmdName = process.argv[2];
-  const args = process.argv.slice(3);
+  const cmdName = args[0];
+  const cmdArgs = args.slice(1);
+  const commandsRegistry: CommandsRegistry = {};
+
+  registerCommand(commandsRegistry, "login", handlerLogin);
+  registerCommand(commandsRegistry, "register", handlerRegister);
+  registerCommand(commandsRegistry, "reset", handlerReset);
+  registerCommand(commandsRegistry, "users", handlerListUsers);
+  registerCommand(commandsRegistry, "agg", handlerAgg);
+  registerCommand(commandsRegistry, "addfeed", handlerAddFeed);
+  registerCommand(commandsRegistry, "feeds", handlerListFeeds);
+  registerCommand(commandsRegistry, "follow", handlerFollow);
+  registerCommand(commandsRegistry, "following", handlerListFeedFollows);
 
   try {
-    await runCommand(registry, cmdName, ...args);
+    await runCommand(commandsRegistry, cmdName, ...cmdArgs);
   } catch (err) {
     if (err instanceof Error) {
-      console.error(err.message);
-      process.exit(1);
+      console.error(`Error running command ${cmdName}: ${err.message}`);
+    } else {
+      console.error(`Error running command ${cmdName}: ${err}`);
     }
+    process.exit(1);
   }
   process.exit(0);
 }

@@ -2,14 +2,16 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
-// Paths
-const configPath = path.join(os.homedir(), ".gatorconfig.json");
-
-// Config
 type Config = {
   dbUrl: string;
   currentUserName: string;
 };
+
+export function setUser(userName: string) {
+  const config = readConfig();
+  config.currentUserName = userName;
+  writeConfig(config);
+}
 
 function validateConfig(rawConfig: any) {
   if (!rawConfig.db_url || typeof rawConfig.db_url !== "string") {
@@ -30,24 +32,29 @@ function validateConfig(rawConfig: any) {
   return config;
 }
 
-// Functions
-export function setUser(currentUserName: string): void {
-  const config = readConfig();
-  config.currentUserName = currentUserName;
-  writeConfig(config);
-}
+export function readConfig() {
+  const fullPath = getConfigFilePath();
 
-export function readConfig(): Config {
-  const configRaw = fs.readFileSync(configPath, { encoding: "utf-8" });
-  const rawConfig = JSON.parse(configRaw);
+  const data = fs.readFileSync(fullPath, "utf-8");
+  const rawConfig = JSON.parse(data);
+
   return validateConfig(rawConfig);
 }
 
-function writeConfig(config: Config): void {
+function getConfigFilePath() {
+  const configFileName = ".gatorconfig.json";
+  const homeDir = os.homedir();
+  return path.join(homeDir, configFileName);
+}
+
+function writeConfig(config: Config) {
+  const fullPath = getConfigFilePath();
+
   const rawConfig = {
     db_url: config.dbUrl,
     current_user_name: config.currentUserName,
   };
-  const jsonConfig = JSON.stringify(rawConfig);
-  fs.writeFileSync(configPath, jsonConfig, { encoding: "utf-8" });
+
+  const data = JSON.stringify(rawConfig, null, 2);
+  fs.writeFileSync(fullPath, data, { encoding: "utf-8" });
 }
