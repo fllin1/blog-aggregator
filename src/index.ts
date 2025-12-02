@@ -2,6 +2,7 @@ import {
   CommandsRegistry,
   registerCommand,
   runCommand,
+  middlewareLoggedIn,
 } from "./commands/commands";
 import {
   handlerListUsers,
@@ -30,7 +31,7 @@ async function main() {
   registerCommand(commandsRegistry, "reset", handlerReset);
   registerCommand(commandsRegistry, "users", handlerListUsers);
   registerCommand(commandsRegistry, "agg", handlerAgg);
-  registerCommand(commandsRegistry, "addfeed", handlerAddFeed);
+  registerCommand(commandsRegistry, "addfeed", middlewareLoggedIn(handlerAddFeed));
   registerCommand(commandsRegistry, "feeds", handlerListFeeds);
   registerCommand(commandsRegistry, "follow", handlerFollow);
   registerCommand(commandsRegistry, "following", handlerListFeedFollows);
