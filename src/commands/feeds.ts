@@ -4,7 +4,7 @@ import { Feed, User } from "src/lib/db/schema";
 import { createFeedFollow } from "../lib/db/queries/feed-follows";
 import { printFeedFollow } from "./feed-follows";
 
-export async function handlerAddFeed(cmdName: string, user: User, ...args: string[]) {
+export async function handlerAddFeed(cmdName: string, user: User, ...args: string[]): Promise<void> {
   if (args.length !== 2) {
     throw new Error(`usage: ${cmdName} <feed_name> <url>`);
   }
